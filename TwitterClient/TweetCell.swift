@@ -31,13 +31,16 @@ class TweetCell: UITableViewCell {
             nameLabel.text = tweet.user!.name
             screenNameLabel.text = "@\(tweet.user!.screenName!)"
             profileImageView.setImageWith(tweet.user!.profileUrl!)
+            profileImageView.layer.cornerRadius = 10
         }
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        // Configure the view for the selected state
+        let bgView = UIView()
+        bgView.backgroundColor = UIColor(red:0.67, green:0.94, blue:1.00, alpha:1.0)
+        selectedBackgroundView = bgView
     }
 
 }

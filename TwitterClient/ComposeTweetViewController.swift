@@ -24,10 +24,12 @@ class ComposeTweetViewController: UIViewController {
             screenNameLabel.text = user.screenName
             if let profileUrl = user.profileUrl {
                 profileImageView.setImageWith(profileUrl)
+                profileImageView.layer.cornerRadius = 10
             }
         }
         
         tweetTextView.delegate = self
+        tweetTextView.becomeFirstResponder()
     }
     
     @IBAction func onCancelButton(_ sender: AnyObject) {
@@ -57,7 +59,12 @@ extension ComposeTweetViewController: UITextViewDelegate {
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if textView.text.characters.count > 140 {
+        
+        if text.isEmpty {
+            return true
+        }
+        
+        if textView.text.characters.count > 139 {
             return false
         }
         

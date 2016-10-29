@@ -17,20 +17,7 @@ class TwitterClient: BDBOAuth1SessionManager {
     
     func handleOpenUrl(_ url: URL) {
         let requestToken = BDBOAuth1Credential(queryString: url.query)
-        fetchAccessToken(withPath: "oauth/access_token", method: "POST", requestToken: requestToken, success: {
-            (accessToken: BDBOAuth1Credential?) -> () in
-                self.currentAccount(success: {
-                    (user: User) -> () in
-                    User.currentUser = user
-                    self.loginSuccess?()
-                }, failure: {
-                    (error: Error) -> () in
-                    self.loginFailure?(error)
-                })
-            }, failure: {
-                (error: Error?) -> () in
-                self.loginFailure?(error)
-        })
+        login(requestToken: requestToken!)
     }
     
     func login(success: @escaping () -> (), failure: @escaping (Error?) -> ()) {
@@ -46,6 +33,30 @@ class TwitterClient: BDBOAuth1SessionManager {
                 (error: Error?) -> () in
                 self.loginFailure?(error)
                 
+        })
+    }
+    
+    func login(user: User) {
+        if let requestToken = user.requestToken {
+            login(requestToken: requestToken)
+        }
+    }
+    
+    func login(requestToken: BDBOAuth1Credential) {
+        fetchAccessToken(withPath: "oauth/access_token", method: "POST", requestToken: requestToken, success: {
+            (accessToken: BDBOAuth1Credential?) -> () in
+            self.currentAccount(success: {
+                (user: User) -> () in
+                user.requestToken = requestToken
+                User.currentUser = user
+                self.loginSuccess?()
+                }, failure: {
+                    (error: Error) -> () in
+                    self.loginFailure?(error)
+            })
+            }, failure: {
+                (error: Error?) -> () in
+                self.loginFailure?(error)
         })
     }
     
@@ -93,7 +104,18 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    //POST https://api.twitter.com/1.1/statuses/update.json?status=Maybe%20he%27ll%20finally%20find%20his%20keys.%20%23peterfalk
+    func retweet() {
+        // TODO
+    }
+    
+    func favorite() {
+        // TODO
+    }
+    
+    func reply() {
+        // TODO
+    }
+    
 }
 
 extension String {

@@ -29,8 +29,12 @@ class TweetDetailViewController: UIViewController {
             guard tweetLabel != nil else { return }
             tweetLabel.text = tweet.text
             nameLabel.text = tweet.user!.name
+            favoritesLabel.text = "\(tweet.favoritesCount)"
+            retweetLabel.text = "\(tweet.retweetCount)"
             screenNameLabel.text = "@\(tweet.user!.screenName!)"
             profileImageView.setImageWith(tweet.user!.profileUrl!)
+            profileImageView.layer.cornerRadius = 10
+
         }
     }
     

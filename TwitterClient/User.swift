@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import BDBOAuth1Manager
 
 class User: NSObject {
     static let userDidLogOutNotification = Notification.Name("UserDidLogOut")
@@ -16,6 +17,7 @@ class User: NSObject {
     var tagLine: String?
     var profileUrl: URL?
     var dictionary: NSDictionary?
+    var requestToken: BDBOAuth1Credential?
     
     init(dictionary: NSDictionary) {
         self.dictionary = dictionary

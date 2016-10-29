@@ -20,6 +20,8 @@ class TweetsViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
+        tableView.estimatedRowHeight = 100
+        tableView.rowHeight = UITableViewAutomaticDimension
         
         tableView.insertSubview(refreshControl, at: 0)
         refreshControl.addTarget(self, action: #selector(loadTimeLine), for: .valueChanged)
@@ -72,4 +74,7 @@ extension TweetsViewController: UITableViewDataSource {
 
 extension TweetsViewController: UITableViewDelegate {
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }

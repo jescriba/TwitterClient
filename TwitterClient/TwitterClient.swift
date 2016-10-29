@@ -7,3 +7,97 @@
 //
 
 import Foundation
+import BDBOAuth1Manager
+
+class TwitterClient: BDBOAuth1SessionManager {
+    static let sharedInstance = TwitterClient(baseURL: URL(string: "https://api.twitter.com")!, consumerKey: "X3jm3IYfpcy2bI6beHeXjDss8", consumerSecret: 	"ZGJOT0d5UmXXLiZ2sTAK7LrfNiGHjqWbY4aJQqXIdWV7oHdnvU")
+    
+    var loginSuccess: (() -> ())?
+    var loginFailure: ((Error?) -> ())?
+    
+    func handleOpenUrl(_ url: URL) {
+        let requestToken = BDBOAuth1Credential(queryString: url.query)
+        fetchAccessToken(withPath: "oauth/access_token", method: "POST", requestToken: requestToken, success: {
+            (accessToken: BDBOAuth1Credential?) -> () in
+                self.currentAccount(success: {
+                    (user: User) -> () in
+                    User.currentUser = user
+                    self.loginSuccess?()
+                }, failure: {
+                    (error: Error) -> () in
+                    self.loginFailure?(error)
+                })
+            }, failure: {
+                (error: Error?) -> () in
+                self.loginFailure?(error)
+        })
+    }
+    
+    func login(success: @escaping () -> (), failure: @escaping (Error?) -> ()) {
+        loginSuccess = success
+        loginFailure = failure
+     
+        deauthorize()
+        fetchRequestToken(withPath: "oauth/request_token", method: "GET", callbackURL: URL(string: "twitter://"), scope: nil, success: {
+                (requestToken: BDBOAuth1Credential?) -> () in
+                let url = URL(string: "https://api.twitter.com/oauth/authorize?oauth_token=\(requestToken!.token!)")!
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }, failure: {
+                (error: Error?) -> () in
+                self.loginFailure?(error)
+                
+        })
+    }
+    
+    func logout() {
+        User.currentUser = nil
+        deauthorize()
+        
+        NotificationCenter.default.post(name: User.userDidLogOutNotification, object: nil)
+    }
+    
+    func homeTimeline(success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
+        get("1.1/statuses/home_timeline.json", parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+                let dictionaries = response as! [NSDictionary]
+                let tweets = Tweet.tweetsWithArray(dictionaries: dictionaries)
+            
+                success(tweets)
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
+    }
+    
+    func currentAccount(success: @escaping (User) -> (), failure: @escaping (Error) -> ()) {
+        get("1.1/account/verify_credentials.json", parameters: nil, progress: nil, success: {
+                (task: URLSessionDataTask, response: Any?) -> () in
+                let userDictionary = response as! NSDictionary
+                let user = User(dictionary: userDictionary)
+                success(user)
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
+    }
+    
+    func tweet(_ message: String, success: () -> (), failure: (Error) -> ()) {
+        let endPoint = "1.1/statuses/update.json?status=\(message.urlEncode())"
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+            //
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                // TODO
+                
+        })
+    }
+    
+    //POST https://api.twitter.com/1.1/statuses/update.json?status=Maybe%20he%27ll%20finally%20find%20his%20keys.%20%23peterfalk
+}
+
+extension String {
+    func urlEncode() -> String {
+        return self.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+    }
+}

@@ -10,26 +10,37 @@ import UIKit
 
 class TweetDetailViewController: UIViewController {
 
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var screenNameLabel: UILabel!
+    @IBOutlet weak var profileImageView: UIImageView!
+    @IBOutlet weak var tweetLabel: UILabel!
+    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var retweetLabel: UILabel!
+    @IBOutlet weak var favoritesLabel: UILabel!
+    
+    internal var tweet: Tweet? {
+        didSet {
+            setupTweetUI()
+        }
+    }
+    
+    private func setupTweetUI() {
+        if let tweet = tweet {
+            guard tweetLabel != nil else { return }
+            tweetLabel.text = tweet.text
+            nameLabel.text = tweet.user!.name
+            screenNameLabel.text = "@\(tweet.user!.screenName!)"
+            profileImageView.setImageWith(tweet.user!.profileUrl!)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        setupTweetUI()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    @IBAction func onReplyButton(_ sender: AnyObject) {
+        // TODO
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

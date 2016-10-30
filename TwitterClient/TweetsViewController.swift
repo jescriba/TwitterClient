@@ -25,6 +25,7 @@ class TweetsViewController: UIViewController {
         
         tableView.insertSubview(refreshControl, at: 0)
         refreshControl.addTarget(self, action: #selector(loadTimeLine), for: .valueChanged)
+        
         loadTimeLine()
     }
     
@@ -37,8 +38,7 @@ class TweetsViewController: UIViewController {
                 self.refreshControl.endRefreshing()
             }, failure: {
                 (error: Error) -> () in
-                // TODO
-                print("Home timeline error \(error.localizedDescription)")
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
 
     }
@@ -58,6 +58,38 @@ class TweetsViewController: UIViewController {
     
 }
 
+extension TweetsViewController: TweetCellDelegate {
+    
+    func onReply(tweetCell: TweetCell) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
+        vc.respondingToTweet = tweetCell.tweet
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func onRetweet(tweetCell: TweetCell) {
+        let tweet = tweetCell.tweet
+        TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
+                (tweet: Tweet) -> () in
+                tweetCell.tweet = tweet
+            }, failure: {
+                (error: Error) -> () in
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
+        })
+    }
+    
+    func onFavorite(tweetCell: TweetCell) {
+        let tweet = tweetCell.tweet
+        TwitterClient.sharedInstance?.toggleFavorite(tweet: tweet!, success: {
+                (tweet: Tweet) -> () in
+                tweetCell.tweet = tweet
+            }, failure: {
+                (error: Error) -> () in
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
+        })
+    }
+}
+
 extension TweetsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -66,6 +98,7 @@ extension TweetsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
+        cell.delegate = self
         cell.tweet = tweets[indexPath.row]
         
         return cell

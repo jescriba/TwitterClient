@@ -1,61 +1,59 @@
 //
-//  ComposeTweetViewController.swift
+//  ReplyViewController.swift
 //  TwitterClient
 //
-//  Created by Joshua Escribano on 10/28/16.
+//  Created by Joshua Escribano on 10/30/16.
 //  Copyright © 2016 Joshua. All rights reserved.
 //
 
 import UIKit
 
-class ComposeTweetViewController: UIViewController {
+class ReplyViewController: UIViewController {
 
-    @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var screenNameLabel: UILabel!
-    @IBOutlet weak var tweetTextView: UITextView!
-    @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var charactersBarButtonItem: UIBarButtonItem!
+    @IBOutlet weak var profileImageView: UIImageView!
+    @IBOutlet weak var responseTextView: UITextView!
+    internal var respondingToTweet: Tweet? {
+        didSet {
+            guard profileImageView != nil else { return }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        responseTextView.delegate = self
+        responseTextView.becomeFirstResponder()
+        setupUI()
+    }
+    
+    private func setupUI() {
         if let user = User.currentUser {
-            nameLabel.text = user.name
-            screenNameLabel.text = user.screenName
             if let profileUrl = user.profileUrl {
                 profileImageView.setImageWith(profileUrl)
                 profileImageView.layer.cornerRadius = 10
             }
         }
-        
-        tweetTextView.delegate = self
-        tweetTextView.becomeFirstResponder()
     }
-    
-    @IBAction func onCancelButton(_ sender: AnyObject) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    @IBAction func onTweetButton(_ sender: AnyObject) {
-        let message = tweetTextView.text!
-        TwitterClient.sharedInstance?.tweet(message, success: {
+
+    @IBAction func onReplyButton(_ sender: AnyObject) {
+        let message = responseTextView.text!
+        TwitterClient.sharedInstance?.reply(message, respondingToTweet: respondingToTweet!, success: {
             () -> () in
-                let timeLine = self.navigationController?.viewControllers[0] as! TweetsViewController
-                //timeLine.addTweet(tweet)
                 self.dismiss(animated: true, completion: nil)
             }, failure: {
-                (error: Error) -> () in
+                (error: Error) in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
     }
+    
 }
 
-extension ComposeTweetViewController: UITextViewDelegate {
-
+extension ReplyViewController: UITextViewDelegate {
+    
     func textViewDidBeginEditing(_ textView: UITextView) {
-        // Remove placeholder
-        textView.text = ""
-        textView.textColor = UIColor.black
+        textView.text = "@\(respondingToTweet!.user!.screenName!) "
+        charactersBarButtonItem.title = "\(140 - textView.text.characters.count)"
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

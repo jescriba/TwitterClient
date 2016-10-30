@@ -28,8 +28,7 @@ class LoginViewController: UIViewController {
                 self.performSegue(withIdentifier: "loginSegue", sender: self)
             }, failure: {
                 (error: Error?) -> () in
-                // TODO
-                print("\(error?.localizedDescription)")
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
     }
 

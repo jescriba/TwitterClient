@@ -12,6 +12,7 @@ import BDBOAuth1Manager
 class User: NSObject {
     static let userDidLogOutNotification = Notification.Name("UserDidLogOut")
 
+    var id: Int?
     var name: String?
     var screenName: String?
     var tagLine: String?
@@ -22,6 +23,7 @@ class User: NSObject {
     init(dictionary: NSDictionary) {
         self.dictionary = dictionary
         
+        id = dictionary["id"] as? Int
         name = dictionary["name"] as? String
         screenName = dictionary["screen_name"] as? String
         tagLine = dictionary["description"] as? String

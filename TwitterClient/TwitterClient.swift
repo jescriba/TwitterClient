@@ -92,50 +92,103 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    func tweet(_ message: String, success: () -> (), failure: (Error) -> ()) {
+    func tweet(_ message: String, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
         let endPoint = "1.1/statuses/update.json?status=\(message.urlEncode())"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-            //
+                success()
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in
-                // TODO
-                
+                failure(error)
         })
     }
     
-    func retweet(tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+    func toggleRetweet(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        if tweet.retweeted ?? false {
+            removeRetweet(tweet: tweet, success: success, failure: failure)
+        } else {
+            retweet(tweet: tweet, success: success, failure: failure)
+        }
+    }
+
+    func retweet(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
         let endPoint = "1.1/statuses/retweet/\(tweet.id!).json"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-                success()
+                tweet.retweeted = true
+                tweet.retweetCount += 1
+                success(tweet)
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in
                 failure(error)
         })
     }
     
-    func removeRetweet(tweet: Tweet) {
-        // TODO
+    func removeRetweet(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        let endPoint = "1.1/statuses/unretweet/\(tweet.id!).json"
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+                tweet.retweeted = false
+                tweet.retweetCount -= 1
+                success(tweet)
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
     }
     
-    func favorite(tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+    func toggleFavorite(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        if tweet.favorited ?? false {
+            removeFavorite(tweet: tweet, success: success, failure: failure)
+        } else {
+            favorite(tweet: tweet, success: success, failure: failure)
+        }
+    }
+    
+    func favorite(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
         let endPoint = "1.1/favorites/create.json?id=\(tweet.id!)"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-                success()
+                tweet.favorited = true
+                tweet.favoritesCount += 1
+                success(tweet)
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in
                 failure(error)
         })
     }
     
-    func removeFavorite(tweet: Tweet) {
-        // TODO
+    func removeFavorite(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        let endPoint = "1.1/favorites/destroy.json?id=\(tweet.id!)"
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+                tweet.favorited = false
+                tweet.favoritesCount -= 1
+                success(tweet)
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
     }
     
-    func reply() {
-        // TODO
+    func reply(_ status: String, respondingToTweet tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+        var parameters = [String:String]()
+        parameters["status"] = status.urlEncode()
+        parameters["in_reply_to_screen_name"] = tweet.user?.screenName!.urlEncode()
+        parameters["in_reply_to_status_id"] = "\(tweet.id)"
+        parameters["in_reply_to_user_id"] = "\(tweet.user?.id)"
+        var endPoint = "1.1/statuses/update.json"
+        for (key, value) in parameters {
+            endPoint += "?\(key)=\(value)"
+        }
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+            tweet.favorited = false
+                success()
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
     }
     
 }

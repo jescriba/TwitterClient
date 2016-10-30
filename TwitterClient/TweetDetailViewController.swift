@@ -31,8 +31,8 @@ class TweetDetailViewController: UIViewController {
             guard tweetLabel != nil else { return }
             tweetLabel.text = tweet.text
             nameLabel.text = tweet.user!.name
-            favoritesLabel.text = "\(tweet.favoritesCount)"
-            retweetLabel.text = "\(tweet.retweetCount)"
+            favoritesLabel.text = tweet.favoritesCount.simpleDescription()
+            retweetLabel.text = tweet.retweetCount.simpleDescription()
             screenNameLabel.text = "@\(tweet.user!.screenName!)"
             profileImageView.setImageWith(tweet.user!.profileUrl!)
             profileImageView.layer.cornerRadius = 10
@@ -46,6 +46,7 @@ class TweetDetailViewController: UIViewController {
             } else {
                 retweetButton.setImage(#imageLiteral(resourceName: "retweet"), for: .normal)
             }
+            dateLabel.text = tweet.timeStamp?.simpleDescription() ?? ""
         }
     }
     
@@ -54,41 +55,41 @@ class TweetDetailViewController: UIViewController {
 
         setupTweetUI()
     }
-
-    @IBAction func onReplyButton(_ sender: AnyObject) {
-        // TODO
-    }
     
     @IBAction func onRetweetButton(_ sender: AnyObject) {
-        if tweet?.retweeted ?? false {
-            TwitterClient.sharedInstance?.removeRetweet(tweet: tweet!)
-        } else {
-            TwitterClient.sharedInstance?.retweet(tweet: tweet!, success: {
-                    () -> () in
-                    self.tweet?.retweeted = true
-                    self.tweet?.retweetCount += 1
-                    self.setupTweetUI()
-                }, failure: {
-                    (error: Error) -> () in
-                    // TODO show failure
-            })
-        }
+        TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
+            (tweet: Tweet) -> () in
+                self.tweet = tweet
+            }, failure: {
+                (error: Error) -> () in
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
+        })
     }
     
     @IBAction func onFavoriteButton(_ sender: AnyObject) {
-        if tweet?.favorited ?? false {
-            TwitterClient.sharedInstance?.removeFavorite(tweet: tweet!)
-        } else {
-            TwitterClient.sharedInstance?.favorite(tweet: tweet!, success: {
-                () -> () in
-                    self.tweet?.favorited = true
-                    self.tweet?.favoritesCount += 1
-                    self.setupTweetUI()
-                }, failure: {
-                    (error: Error) -> () in
-                    // TODO show failure
-            })
+        TwitterClient.sharedInstance?.toggleFavorite(tweet: tweet!, success: {
+            (tweet: Tweet) -> () in
+                self.tweet = tweet
+            }, failure: {
+                (error: Error) -> () in
+                self.present(Alert.controller(error: error), animated: true, completion: nil)
+        })
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let replyVC = segue.destination as? ReplyViewController
+        if let vc = replyVC {
+            vc.respondingToTweet = tweet
         }
     }
     
+}
+
+extension Date {
+    
+    func simpleDescription() -> String? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/d/yy, HH:mm"
+        return formatter.string(from: self)
+    }
 }

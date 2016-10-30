@@ -104,11 +104,33 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    func retweet() {
+    func retweet(tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+        let endPoint = "1.1/statuses/retweet/\(tweet.id!).json"
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+                success()
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
+    }
+    
+    func removeRetweet(tweet: Tweet) {
         // TODO
     }
     
-    func favorite() {
+    func favorite(tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+        let endPoint = "1.1/favorites/create.json?id=\(tweet.id!)"
+        post(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+                success()
+            }, failure: {
+                (task: URLSessionDataTask?, error: Error) -> () in
+                failure(error)
+        })
+    }
+    
+    func removeFavorite(tweet: Tweet) {
         // TODO
     }
     

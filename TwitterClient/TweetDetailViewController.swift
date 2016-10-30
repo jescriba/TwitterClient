@@ -17,6 +17,8 @@ class TweetDetailViewController: UIViewController {
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var retweetLabel: UILabel!
     @IBOutlet weak var favoritesLabel: UILabel!
+    @IBOutlet weak var favoriteButton: UIButton!
+    @IBOutlet weak var retweetButton: UIButton!
     
     internal var tweet: Tweet? {
         didSet {
@@ -34,7 +36,16 @@ class TweetDetailViewController: UIViewController {
             screenNameLabel.text = "@\(tweet.user!.screenName!)"
             profileImageView.setImageWith(tweet.user!.profileUrl!)
             profileImageView.layer.cornerRadius = 10
-
+            if tweet.favorited ?? false {
+                favoriteButton.setImage(#imageLiteral(resourceName: "red_heart"), for: .normal)
+            } else {
+                favoriteButton.setImage(#imageLiteral(resourceName: "heart"), for: .normal)
+            }
+            if tweet.retweeted ?? false {
+                retweetButton.setImage(#imageLiteral(resourceName: "green_retweet"), for: .normal)
+            } else {
+                retweetButton.setImage(#imageLiteral(resourceName: "retweet"), for: .normal)
+            }
         }
     }
     
@@ -47,4 +58,37 @@ class TweetDetailViewController: UIViewController {
     @IBAction func onReplyButton(_ sender: AnyObject) {
         // TODO
     }
+    
+    @IBAction func onRetweetButton(_ sender: AnyObject) {
+        if tweet?.retweeted ?? false {
+            TwitterClient.sharedInstance?.removeRetweet(tweet: tweet!)
+        } else {
+            TwitterClient.sharedInstance?.retweet(tweet: tweet!, success: {
+                    () -> () in
+                    self.tweet?.retweeted = true
+                    self.tweet?.retweetCount += 1
+                    self.setupTweetUI()
+                }, failure: {
+                    (error: Error) -> () in
+                    // TODO show failure
+            })
+        }
+    }
+    
+    @IBAction func onFavoriteButton(_ sender: AnyObject) {
+        if tweet?.favorited ?? false {
+            TwitterClient.sharedInstance?.removeFavorite(tweet: tweet!)
+        } else {
+            TwitterClient.sharedInstance?.favorite(tweet: tweet!, success: {
+                () -> () in
+                    self.tweet?.favorited = true
+                    self.tweet?.favoritesCount += 1
+                    self.setupTweetUI()
+                }, failure: {
+                    (error: Error) -> () in
+                    // TODO show failure
+            })
+        }
+    }
+    
 }

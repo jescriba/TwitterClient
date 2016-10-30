@@ -14,6 +14,10 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var screenNameLabel: UILabel!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var profileImageView: UIImageView!
+
+    @IBOutlet weak var retweetButton: UIButton!
+    @IBOutlet weak var favoriteButton: UIButton!
+    
     internal var tweet: Tweet? {
         didSet {
             setupTweetUI()
@@ -32,6 +36,16 @@ class TweetCell: UITableViewCell {
             screenNameLabel.text = "@\(tweet.user!.screenName!)"
             profileImageView.setImageWith(tweet.user!.profileUrl!)
             profileImageView.layer.cornerRadius = 10
+            if tweet.favorited ?? false {
+                favoriteButton.setImage(#imageLiteral(resourceName: "red_heart"), for: .normal)
+            } else {
+                favoriteButton.setImage(#imageLiteral(resourceName: "heart"), for: .normal)
+            }
+            if tweet.retweeted ?? false {
+                retweetButton.setImage(#imageLiteral(resourceName: "green_retweet"), for: .normal)
+            } else {
+                retweetButton.setImage(#imageLiteral(resourceName: "retweet"), for: .normal)
+            }
         }
     }
 
@@ -43,4 +57,12 @@ class TweetCell: UITableViewCell {
         selectedBackgroundView = bgView
     }
 
+    @IBAction func onReplyButton(_ sender: AnyObject) {
+    }
+    
+    @IBAction func onRetweetButton(_ sender: AnyObject) {
+    }
+    
+    @IBAction func onFavoriteButton(_ sender: AnyObject) {
+    }
 }

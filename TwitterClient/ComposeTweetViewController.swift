@@ -40,11 +40,20 @@ class ComposeTweetViewController: UIViewController {
         let message = tweetTextView.text!
         TwitterClient.sharedInstance?.tweet(message, success: {
             () -> () in
-                self.dismiss(animated: true, completion: nil)
+                self.dismiss(animated: true, completion: {
+//                    let vc = self.presentedViewController as! TweetsViewController
+//                    let parameters = NSDictionary()
+//                    parameters.setValue(message, forKey: "text")
+//                    vc.tweets += [Tweet(dictionary: parameters)]
+                })
             }, failure: {
                 (error: Error) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        //
     }
 }
 

@@ -30,6 +30,8 @@ class TweetCell: UITableViewCell {
     
     internal var tweet: Tweet? {
         didSet {
+            guard nameLabel != nil else { return }
+
             setupTweetUI()
         }
     }

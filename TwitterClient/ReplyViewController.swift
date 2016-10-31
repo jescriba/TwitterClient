@@ -40,7 +40,7 @@ class ReplyViewController: UIViewController {
         let message = responseTextView.text!
         TwitterClient.sharedInstance?.reply(message, respondingToTweet: respondingToTweet!, success: {
             () -> () in
-                self.dismiss(animated: true, completion: nil)
+                self.navigationController?.popToRootViewController(animated: true)
             }, failure: {
                 (error: Error) in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)

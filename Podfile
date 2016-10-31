@@ -8,5 +8,6 @@ target 'TwitterClient' do
   # Pods for TwitterClient
   pod 'AFNetworking'
   pod 'BDBOAuth1Manager'
+  pod 'CircularSpinner'
 
 end

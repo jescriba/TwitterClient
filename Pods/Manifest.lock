@@ -16,15 +16,18 @@ PODS:
     - AFNetworking/NSURLSession
   - BDBOAuth1Manager (2.0.0):
     - AFNetworking/NSURLSession (~> 3.0.0)
+  - CircularSpinner (1.1.2)
 
 DEPENDENCIES:
   - AFNetworking
   - BDBOAuth1Manager
+  - CircularSpinner
 
 SPEC CHECKSUMS:
   AFNetworking: a0075feb321559dc78d9d85b55d11caa19eabb93
   BDBOAuth1Manager: 92d17d06f8a648602962304cd2f35ae7394fa001
+  CircularSpinner: e7ae2fdfcae4e3f3065e62e2e66de3c1837c7663
 
-PODFILE CHECKSUM: 0becd0e1425bfa18063b4d193ed6c69d8aefddac
+PODFILE CHECKSUM: 083539edfd325f2930510eee7d7d9c47ce534b13
 
 COCOAPODS: 1.1.1

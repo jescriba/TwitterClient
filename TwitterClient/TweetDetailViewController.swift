@@ -60,6 +60,7 @@ class TweetDetailViewController: UIViewController {
         TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
             (tweet: Tweet) -> () in
                 self.tweet = tweet
+                self.navigationController?.popToRootViewController(animated: true)
             }, failure: {
                 (error: Error) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)

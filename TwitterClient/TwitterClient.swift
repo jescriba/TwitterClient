@@ -67,8 +67,13 @@ class TwitterClient: BDBOAuth1SessionManager {
         NotificationCenter.default.post(name: User.userDidLogOutNotification, object: nil)
     }
     
-    func homeTimeline(success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
-        get("1.1/statuses/home_timeline.json", parameters: nil, progress: nil, success: {
+    func homeTimeline(maxId: Int? = nil, success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
+        var endPoint = "1.1/statuses/home_timeline.json"
+        if let maxId = maxId {
+            endPoint += "?max_id=\(maxId)"
+        }
+        
+        get(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
                 let dictionaries = response as! [NSDictionary]
                 let tweets = Tweet.tweetsWithArray(dictionaries: dictionaries)
@@ -172,18 +177,10 @@ class TwitterClient: BDBOAuth1SessionManager {
     }
     
     func reply(_ status: String, respondingToTweet tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
-        var parameters = [String:String]()
-        parameters["status"] = status.urlEncode()
-        parameters["in_reply_to_screen_name"] = tweet.user?.screenName!.urlEncode()
-        parameters["in_reply_to_status_id"] = "\(tweet.id)"
-        parameters["in_reply_to_user_id"] = "\(tweet.user?.id)"
         var endPoint = "1.1/statuses/update.json"
-        for (key, value) in parameters {
-            endPoint += "?\(key)=\(value)"
-        }
+        endPoint += "?status=\(status.urlEncode())&in_reply_to_status_id=\(tweet.id!)"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-            tweet.favorited = false
                 success()
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in

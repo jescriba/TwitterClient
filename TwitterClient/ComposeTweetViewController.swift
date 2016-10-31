@@ -40,8 +40,6 @@ class ComposeTweetViewController: UIViewController {
         let message = tweetTextView.text!
         TwitterClient.sharedInstance?.tweet(message, success: {
             () -> () in
-                let timeLine = self.navigationController?.viewControllers[0] as! TweetsViewController
-                //timeLine.addTweet(tweet)
                 self.dismiss(animated: true, completion: nil)
             }, failure: {
                 (error: Error) -> () in

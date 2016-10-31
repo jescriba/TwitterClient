@@ -7,11 +7,14 @@
 //
 
 import UIKit
+import CircularSpinner
 
 class TweetsViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    internal var hasMoreTweets = true
     internal var tweets = [Tweet]()
+    internal var isLoading = false
     private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
@@ -24,20 +27,40 @@ class TweetsViewController: UIViewController {
         tableView.rowHeight = UITableViewAutomaticDimension
         
         tableView.insertSubview(refreshControl, at: 0)
-        refreshControl.addTarget(self, action: #selector(loadTimeLine), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
         
         loadTimeLine()
     }
     
-    @objc private func loadTimeLine() {
+    @objc internal func loadTimeLine(maxId offsetId: Int = -1) {
+        // For Obj C
+        var maxId: Int?
+        if offsetId != -1 {
+            maxId = offsetId
+        }
+        
+        isLoading = true
         refreshControl.beginRefreshing()
-        TwitterClient.sharedInstance?.homeTimeline(success: {
+        CircularSpinner.show("Loading tweets...", animated: true, type: .indeterminate)
+        TwitterClient.sharedInstance?.homeTimeline(maxId: maxId, success: {
             (tweets: [Tweet]) -> () in
+            if tweets.count == 0 {
+                self.hasMoreTweets = false
+            }
+            if maxId == nil {
                 self.tweets = tweets
-                self.tableView.reloadData()
-                self.refreshControl.endRefreshing()
+            } else {
+                self.tweets += tweets
+            }
+            self.tableView.reloadData()
+            CircularSpinner.hide()
+            self.refreshControl.endRefreshing()
+            self.isLoading = false
             }, failure: {
                 (error: Error) -> () in
+                CircularSpinner.hide()
+                self.refreshControl.endRefreshing()
+                self.isLoading = false
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
 
@@ -100,6 +123,13 @@ extension TweetsViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
         cell.delegate = self
         cell.tweet = tweets[indexPath.row]
+        
+        if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && tableView.isDragging {
+            let lastTweet = tweets.last!
+            let maxId = lastTweet.id!
+            
+            loadTimeLine(maxId: maxId)
+        }
         
         return cell
     }

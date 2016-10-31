@@ -36,6 +36,8 @@ class Tweet: NSObject {
         let userDictionary = dictionary["user"] as? NSDictionary
         if let userDictionary = userDictionary {
             user = User(dictionary: userDictionary)
+        } else {
+            user = User.currentUser
         }
     }
     

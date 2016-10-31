@@ -97,11 +97,17 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    func tweet(_ message: String, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+    func tweet(_ message: String, success: @escaping (Tweet?) -> (), failure: @escaping (Error) -> ()) {
         let endPoint = "1.1/statuses/update.json?status=\(message.urlEncode())"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-                success()
+                let dictionary = response as? NSDictionary
+                var tweet: Tweet? = nil
+                if let dict = dictionary {
+                    tweet = Tweet(dictionary: dict)
+                }
+            
+                success(tweet)
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in
                 failure(error)
@@ -176,12 +182,18 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    func reply(_ status: String, respondingToTweet tweet: Tweet, success: @escaping () -> (), failure: @escaping (Error) -> ()) {
+    func reply(_ status: String, respondingToTweet tweet: Tweet, success: @escaping (Tweet?) -> (), failure: @escaping (Error) -> ()) {
         var endPoint = "1.1/statuses/update.json"
         endPoint += "?status=\(status.urlEncode())&in_reply_to_status_id=\(tweet.id!)"
         post(endPoint, parameters: nil, progress: nil, success: {
             (task: URLSessionDataTask, response: Any?) -> () in
-                success()
+                let dictionary = response as? NSDictionary
+                var tweet: Tweet? = nil
+                if let dict = dictionary {
+                    tweet = Tweet(dictionary: dict)
+                }
+            
+                success(tweet)
             }, failure: {
                 (task: URLSessionDataTask?, error: Error) -> () in
                 failure(error)

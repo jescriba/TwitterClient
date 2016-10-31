@@ -40,9 +40,9 @@ class ComposeTweetViewController: UIViewController {
     @IBAction func onTweetButton(_ sender: AnyObject) {
         let message = tweetTextView.text!
         TwitterClient.sharedInstance?.tweet(message, success: {
-            () -> () in
+            (tweet: Tweet?) -> () in
                 let params = ["text": message]
-                self.newTweet(Tweet(dictionary: params as NSDictionary))
+                self.newTweet(tweet ?? Tweet(dictionary: params as NSDictionary))
                 self.dismiss(animated: true, completion: nil)
             }, failure: {
                 (error: Error) -> () in

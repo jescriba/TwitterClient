@@ -42,9 +42,8 @@ class ReplyViewController: UIViewController {
         let message = responseTextView.text!
         TwitterClient.sharedInstance?.reply(message, respondingToTweet: respondingToTweet!, success: {
             () -> () in
-                let params = NSDictionary()
-                params.setValue(message, forKey: "text")
-                self.newTweet(Tweet(dictionary: params))
+                let params = ["text": message]
+                self.newTweet(Tweet(dictionary: params as NSDictionary))
                 self.navigationController?.popToRootViewController(animated: true)
             }, failure: {
                 (error: Error) in

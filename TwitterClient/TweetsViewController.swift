@@ -76,17 +76,23 @@ class TweetsViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let tweetDetailVC = segue.destination as? TweetDetailViewController
+        let navigationController = segue.destination as? UINavigationController
         
         if let vc = tweetDetailVC {
             tweetDetailVC?.delegate = self
             
             let cell = sender as! TweetCell
             vc.tweet = cell.tweet
+        } else if let navVC = navigationController {
+            let composeVC = navVC.topViewController as? ComposeTweetViewController
+            if let vc = composeVC {
+                vc.delegate = self
+            }
         }
     }
     
     internal func newTweet(_ tweet: Tweet) {
-        self.tweets += [tweet]
+        self.tweets.insert(tweet, at: 0)
         tableView.reloadData()
     }
     

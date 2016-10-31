@@ -19,6 +19,7 @@ class TweetDetailViewController: UIViewController {
     @IBOutlet weak var favoritesLabel: UILabel!
     @IBOutlet weak var favoriteButton: UIButton!
     @IBOutlet weak var retweetButton: UIButton!
+    weak var delegate: TweetsViewController?
     
     internal var tweet: Tweet? {
         didSet {
@@ -60,6 +61,7 @@ class TweetDetailViewController: UIViewController {
         TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
             (tweet: Tweet) -> () in
                 self.tweet = tweet
+                self.delegate?.newTweet(tweet)
                 self.navigationController?.popToRootViewController(animated: true)
             }, failure: {
                 (error: Error) -> () in
@@ -82,6 +84,14 @@ class TweetDetailViewController: UIViewController {
         if let vc = replyVC {
             vc.respondingToTweet = tweet
         }
+    }
+    
+}
+
+extension TweetDetailViewController: TweetsViewControllerDelegate {
+    
+    func newTweet(_ tweet: Tweet) {
+        delegate?.newTweet(tweet)
     }
     
 }

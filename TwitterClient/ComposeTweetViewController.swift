@@ -15,6 +15,7 @@ class ComposeTweetViewController: UIViewController {
     @IBOutlet weak var tweetTextView: UITextView!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var charactersBarButtonItem: UIBarButtonItem!
+    weak var delegate: TweetsViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,20 +41,21 @@ class ComposeTweetViewController: UIViewController {
         let message = tweetTextView.text!
         TwitterClient.sharedInstance?.tweet(message, success: {
             () -> () in
-                self.dismiss(animated: true, completion: {
-//                    let vc = self.presentedViewController as! TweetsViewController
-//                    let parameters = NSDictionary()
-//                    parameters.setValue(message, forKey: "text")
-//                    vc.tweets += [Tweet(dictionary: parameters)]
-                })
+                self.dismiss(animated: true, completion: nil)
+            
+                let params = NSDictionary()
+                params.setValue(message, forKey: "text")
+                self.newTweet(Tweet(dictionary: params))
             }, failure: {
                 (error: Error) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        //
+}
+
+extension ComposeTweetViewController: TweetsViewControllerDelegate {
+    func newTweet(_ tweet: Tweet) {
+        delegate?.newTweet(tweet)
     }
 }
 

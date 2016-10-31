@@ -9,6 +9,10 @@
 import UIKit
 import CircularSpinner
 
+protocol TweetsViewControllerDelegate {
+    func newTweet(_ tweet: Tweet)
+}
+
 class TweetsViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
@@ -74,9 +78,16 @@ class TweetsViewController: UIViewController {
         let tweetDetailVC = segue.destination as? TweetDetailViewController
         
         if let vc = tweetDetailVC {
+            tweetDetailVC?.delegate = self
+            
             let cell = sender as! TweetCell
             vc.tweet = cell.tweet
         }
+    }
+    
+    internal func newTweet(_ tweet: Tweet) {
+        self.tweets += [tweet]
+        tableView.reloadData()
     }
     
 }
@@ -87,6 +98,7 @@ extension TweetsViewController: TweetCellDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
         vc.respondingToTweet = tweetCell.tweet
+        vc.delegate = self
         navigationController?.pushViewController(vc, animated: true)
     }
     

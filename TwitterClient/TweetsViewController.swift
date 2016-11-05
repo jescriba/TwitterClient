@@ -32,7 +32,6 @@ class TweetsViewController: UIViewController {
         
         tableView.insertSubview(refreshControl, at: 0)
         refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
-        
         loadTimeLine()
     }
     
@@ -94,6 +93,12 @@ class TweetsViewController: UIViewController {
     internal func newTweet(_ tweet: Tweet) {
         self.tweets.insert(tweet, at: 0)
         tableView.reloadData()
+    }
+    
+    @IBAction func onProfileImageTapGesture(_ sender: UITapGestureRecognizer) {
+        let tweetCell = sender.view?.superview?.superview as! TweetCell
+        let user = tweetCell.tweet?.user!
+        
     }
     
 }

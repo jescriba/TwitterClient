@@ -43,6 +43,8 @@ class MenuViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.separatorInset = UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
+        tableView.separatorColor = UIColor(red:0.00, green:0.42, blue:1.00, alpha:1.0)
         tableView.backgroundColor = view.backgroundColor
         tableView.tableFooterView = UIView()
         

@@ -27,7 +27,7 @@ class MenuCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         let bgView = UIView()
-        bgView.backgroundColor = UIColor(red:0.67, green:0.94, blue:1.00, alpha:1.0)
+        bgView.backgroundColor = UIColor(red:0.49, green:0.36, blue:1.00, alpha:1.0)
         selectedBackgroundView = bgView
     }
 

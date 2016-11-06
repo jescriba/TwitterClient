@@ -10,16 +10,22 @@ import UIKit
 import CircularSpinner
 
 class ProfileViewController: UIViewController {
-    
+
+    @IBOutlet weak var scrollViewHeightContraint: NSLayoutConstraint!
+    @IBOutlet weak var userBio: UILabel!
+    @IBOutlet weak var pageControl: UIPageControl!
+    @IBOutlet weak var headerScrollView: UIScrollView!
     @IBOutlet weak var followersNumberLabel: UILabel!
     @IBOutlet weak var followingNumberLabel: UILabel!
     @IBOutlet weak var tweetsNumberLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var headerImageView: UIImageView!
+    internal var originalScrollViewHeight: CGFloat!
     internal var user: User! {
         didSet {
             view.layoutIfNeeded()
             
+            userBio.text = user.tagLine
             followingNumberLabel.text = "\(user.friendsCount.simpleDescription())"
             followersNumberLabel.text = "\(user.followersCount.simpleDescription())"
             tweetsNumberLabel.text = "\(user.statusesCount.simpleDescription())"
@@ -37,7 +43,9 @@ class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        originalScrollViewHeight = scrollViewHeightContraint.constant
         
+        headerScrollView.delegate = self
         tableView.dataSource = self
         tableView.delegate = self
         tableView.estimatedRowHeight = 100
@@ -84,6 +92,34 @@ class ProfileViewController: UIViewController {
             self.isLoading = false
             self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
+    }
+    
+    @IBAction func onPanGesture(_ sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: view)
+        
+        switch sender.state {
+        case .began:
+            headerImageView.addBlur()
+            headerImageView.blurView()?.alpha = 0
+        case .changed:
+            if translation.y > 0 && translation.y < 100 {
+                let ratio = translation.y / 100
+                headerImageView.blurView()?.alpha = ratio
+                scrollViewHeightContraint.constant = originalScrollViewHeight + translation.y
+                animateBioAlpha(to: ratio)
+            }
+        case .ended:
+            UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseInOut, animations: {
+                self.headerImageView.blurView()?.alpha = 0
+                self.userBio.alpha = 0
+                self.scrollViewHeightContraint.constant = self.originalScrollViewHeight
+            }, completion: {
+                (result: Bool) -> () in
+                self.headerImageView.removeBlur()
+            })
+        default:
+            break
+        }
     }
 }
 
@@ -164,5 +200,75 @@ extension ProfileViewController: UITableViewDataSource {
         cell.tweet = tweets[indexPath.row]
         
         return cell
+    }
+}
+
+extension ProfileViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let xOffset = scrollView.contentOffset.x
+        headerImageView.alpha = 1 - xOffset / scrollView.contentSize.width
+        headerImageView.removeBlur()
+        animateBioAlpha(to: 0)
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        // Display text if not decelerating
+        if decelerate == false {
+            if scrollView.contentOffset.x == view.frame.width {
+                pageControl.currentPage = 1
+                headerImageView.layer.opacity = 0.6
+                animateBioAlpha(to: 1)
+            }
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.x == view.frame.width {
+            pageControl.currentPage = 1
+            headerImageView.layer.opacity = 0.6
+            headerImageView.addBlur()
+            animateBioAlpha(to: 1)
+        } else {
+            pageControl.currentPage = 0
+            headerImageView.removeBlur()
+            animateBioAlpha(to: 0)
+        }
+    }
+    
+    func animateBioAlpha(to: CGFloat) {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.userBio.alpha = to
+        })
+    }
+}
+
+extension UIImageView {
+    
+    func blurView() -> UIVisualEffectView? {
+        for subView in self.subviews {
+            if subView is UIVisualEffectView {
+                return subView as? UIVisualEffectView
+            }
+        }
+        
+        return nil
+    }
+    
+    func addBlur() {
+        let effect = UIBlurEffect(style: .light)
+        let effectView = UIVisualEffectView(effect: effect)
+        effectView.frame = self.frame
+        effectView.layer.cornerRadius = 5
+        effectView.clipsToBounds = true
+        effectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(effectView)
+    }
+    
+    func removeBlur() {
+        for subView in self.subviews {
+            if subView is UIVisualEffectView {
+                subView.removeFromSuperview()
+            }
+        }
     }
 }

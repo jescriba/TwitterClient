@@ -16,7 +16,7 @@ protocol TweetsViewControllerDelegate {
 class TweetsViewController: UIViewController {
 
     @IBOutlet weak var menuButton: UIBarButtonItem!
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableView: TweetsTableView!
     internal weak var delegate: MenuViewController!
     internal var hasMoreTweets = true
     internal var tweets = [Tweet]()
@@ -26,17 +26,11 @@ class TweetsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.tableFooterView = UIView()
-        tableView.estimatedRowHeight = 100
-        tableView.rowHeight = UITableViewAutomaticDimension
-        
-        tableView.insertSubview(refreshControl, at: 0)
-        refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
+        tableView.tweetDelegate = self
+        tableView.reload()
+//        refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
         menuButton.target = self
         menuButton.action = #selector(onToggleMenu)
-        loadTimeLine()
     }
     
     @objc internal func loadTimeLine(maxId offsetId: Int = -1) {
@@ -78,7 +72,7 @@ class TweetsViewController: UIViewController {
         let navigationController = segue.destination as? UINavigationController
         
         if let vc = tweetDetailVC {
-            tweetDetailVC?.delegate = self
+            //tweetDetailVC?.delegate = self
             
             let cell = sender as! TweetCell
             vc.tweet = cell.tweet
@@ -92,19 +86,19 @@ class TweetsViewController: UIViewController {
     
 }
 
-extension TweetsViewController: TweetsViewControllerDelegate {
-    internal func newTweet(_ tweet: Tweet) {
-        self.tweets.insert(tweet, at: 0)
-        tableView.reloadData()
+extension TweetsViewController: TweetsTableViewDelegate {
+    
+    func onProfileImageTap(user: User) {
+        //
     }
+    
 }
 
 extension TweetsViewController: MenuViewControllerDelegate {
     
-    internal func onToggleMenu() {
+    func onToggleMenu() {
         delegate?.onToggleMenu()
     }
-    
 }
 
 extension TweetsViewController: TweetCellDelegate {
@@ -121,7 +115,7 @@ extension TweetsViewController: TweetCellDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
         vc.respondingToTweet = tweetCell.tweet
-        vc.delegate = self
+        //vc.delegate = self
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -145,34 +139,5 @@ extension TweetsViewController: TweetCellDelegate {
                 (error: Error) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
-    }
-}
-
-extension TweetsViewController: UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tweets.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
-        cell.delegate = self as? TweetCellDelegate
-        cell.tweet = tweets[indexPath.row]
-        
-        if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && tableView.isDragging {
-            let lastTweet = tweets.last!
-            let maxId = lastTweet.id!
-            
-            loadTimeLine(maxId: maxId)
-        }
-        
-        return cell
-    }
-}
-
-extension TweetsViewController: UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

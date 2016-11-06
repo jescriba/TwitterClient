@@ -95,12 +95,3 @@ extension TweetDetailViewController: TweetsViewControllerDelegate {
     }
     
 }
-
-extension Date {
-    
-    func simpleDescription() -> String? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/d/yy, HH:mm"
-        return formatter.string(from: self)
-    }
-}

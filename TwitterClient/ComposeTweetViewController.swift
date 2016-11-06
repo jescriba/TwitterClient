@@ -53,7 +53,7 @@ class ComposeTweetViewController: UIViewController {
 
 extension ComposeTweetViewController: TweetsViewControllerDelegate {
     func newTweet(_ tweet: Tweet) {
-        delegate?.newTweet(tweet)
+        //delegate?.newTweet(tweet)
     }
 }
 

@@ -241,34 +241,3 @@ extension ProfileViewController: UIScrollViewDelegate {
         })
     }
 }
-
-extension UIImageView {
-    
-    func blurView() -> UIVisualEffectView? {
-        for subView in self.subviews {
-            if subView is UIVisualEffectView {
-                return subView as? UIVisualEffectView
-            }
-        }
-        
-        return nil
-    }
-    
-    func addBlur() {
-        let effect = UIBlurEffect(style: .light)
-        let effectView = UIVisualEffectView(effect: effect)
-        effectView.frame = self.frame
-        effectView.layer.cornerRadius = 5
-        effectView.clipsToBounds = true
-        effectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(effectView)
-    }
-    
-    func removeBlur() {
-        for subView in self.subviews {
-            if subView is UIVisualEffectView {
-                subView.removeFromSuperview()
-            }
-        }
-    }
-}

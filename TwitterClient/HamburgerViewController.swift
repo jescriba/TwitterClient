@@ -78,7 +78,7 @@ class HamburgerViewController: UIViewController {
             originalLeftMargin = leftMarginConstraint.constant
         } else if sender.state == .changed {
             let newConstraint = originalLeftMargin + translation.x
-            if newConstraint >= 0 {
+            if newConstraint >= 0 && newConstraint < self.openMenuMarginConstraint + 20 {
                 leftMarginConstraint.constant = originalLeftMargin + translation.x
             }
         } else if sender.state == .ended {

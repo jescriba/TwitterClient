@@ -19,7 +19,7 @@ class TweetDetailViewController: UIViewController {
     @IBOutlet weak var favoritesLabel: UILabel!
     @IBOutlet weak var favoriteButton: UIButton!
     @IBOutlet weak var retweetButton: UIButton!
-    weak var delegate: TweetsViewController?
+    var delegate: TweetsViewControllerDelegate?
     
     internal var tweet: Tweet? {
         didSet {

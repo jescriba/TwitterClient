@@ -97,8 +97,22 @@ extension ProfileViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let tweetDetailVC = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
+        tweetDetailVC.delegate = self
+        let cell = tableView.cellForRow(at: indexPath) as! TweetCell
+        tweetDetailVC.tweet = cell.tweet
+        
+        navigationController?.pushViewController(tweetDetailVC, animated: true)
     }
     
+}
+
+extension ProfileViewController: TweetsViewControllerDelegate {
+    func newTweet(_ tweet: Tweet) {
+        //
+    }
 }
 
 extension ProfileViewController: TweetCellDelegate {

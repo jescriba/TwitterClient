@@ -90,11 +90,13 @@ class TweetsViewController: UIViewController {
         }
     }
     
+}
+
+extension TweetsViewController: TweetsViewControllerDelegate {
     internal func newTweet(_ tweet: Tweet) {
         self.tweets.insert(tweet, at: 0)
         tableView.reloadData()
     }
-    
 }
 
 extension TweetsViewController: MenuViewControllerDelegate {

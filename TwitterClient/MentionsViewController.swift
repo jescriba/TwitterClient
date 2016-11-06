@@ -70,7 +70,11 @@ class MentionsViewController: UIViewController {
 extension MentionsViewController: TweetCellDelegate {
     
     func onProfileImageTap(tweetCell: TweetCell) {
-        //
+        let user = tweetCell.tweet!.user!
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
+        vc.user = user
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     func onReply(tweetCell: TweetCell) {
@@ -104,10 +108,24 @@ extension MentionsViewController: TweetCellDelegate {
     
 }
 
+extension MentionsViewController: TweetsViewControllerDelegate {
+    func newTweet(_ tweet: Tweet) {
+        //
+    }
+}
+
 extension MentionsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let tweetDetailVC = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
+        tweetDetailVC.delegate = self
+        let cell = tableView.cellForRow(at: indexPath) as! TweetCell
+        tweetDetailVC.tweet = cell.tweet
+        
+        navigationController?.pushViewController(tweetDetailVC, animated: true)
     }
     
 }

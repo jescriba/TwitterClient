@@ -12,7 +12,8 @@ class HamburgerViewController: UIViewController {
     @IBOutlet weak var menuView: UIView!
     @IBOutlet weak var contentView: UIView!
     @IBOutlet weak var leftMarginConstraint: NSLayoutConstraint!
-    
+    private var openMenuMarginConstraint: CGFloat = 120
+    internal var hasMenuOpen = false
     internal var menuViewController: MenuViewController! {
         didSet {
             view.layoutIfNeeded()
@@ -53,11 +54,20 @@ class HamburgerViewController: UIViewController {
         contentView.layer.shadowOpacity = 0.5
     }
     
-    private func closeMenu() {
+    internal func openMenu() {
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: .curveEaseIn, animations: {
+            self.leftMarginConstraint.constant = self.openMenuMarginConstraint
+            self.view.layoutIfNeeded()
+        }, completion: nil)
+        hasMenuOpen = true
+    }
+    
+    internal func closeMenu() {
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: .curveEaseIn, animations: {
             self.leftMarginConstraint.constant = 0
             self.view.layoutIfNeeded()
         }, completion: nil)
+        hasMenuOpen = false
     }
 
     @IBAction func onPanGesture(_ sender: UIPanGestureRecognizer) {
@@ -74,9 +84,11 @@ class HamburgerViewController: UIViewController {
         } else if sender.state == .ended {
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.3, initialSpringVelocity: velocity.x, options: .curveEaseIn, animations: {
                 if velocity.x > 0 {
-                    self.leftMarginConstraint.constant = 150
+                    self.leftMarginConstraint.constant = self.openMenuMarginConstraint
+                    self.hasMenuOpen = true
                 } else {
                     self.leftMarginConstraint.constant = 0
+                    self.hasMenuOpen = false
                 }
             }, completion: nil)
         }

@@ -12,6 +12,7 @@ protocol TweetCellDelegate {
     func onReply(tweetCell: TweetCell)
     func onRetweet(tweetCell: TweetCell)
     func onFavorite(tweetCell: TweetCell)
+    func onProfileImageTap(tweetCell: TweetCell)
 }
 
 class TweetCell: UITableViewCell {
@@ -26,7 +27,7 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var favoritesCountLabel: UILabel!
     @IBOutlet weak var timeSincePostLabel: UILabel!
     
-    weak var delegate: TweetsViewController?
+    var delegate: TweetCellDelegate?
     
     internal var tweet: Tweet? {
         didSet {
@@ -38,6 +39,10 @@ class TweetCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        let profileTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onProfileImageTap))
+        profileImageView.isUserInteractionEnabled = true
+        profileImageView.addGestureRecognizer(profileTapRecognizer)
     }
     
     private func setupTweetUI() {
@@ -71,6 +76,10 @@ class TweetCell: UITableViewCell {
         selectedBackgroundView = bgView
     }
     
+    func onProfileImageTap() {
+        delegate?.onProfileImageTap(tweetCell: self)
+    }
+    
     @IBAction func onReplyButton(_ sender: AnyObject) {
         delegate?.onReply(tweetCell: self)
     }
@@ -91,11 +100,11 @@ extension Int {
     func simpleDescription() -> String {
         switch self {
         case 1000...999999:
-            let val = Int(Double(self) / 1000.0)
-            return "\(val) K"
+            let val = Double(self) / 1000.0
+            return String(format: "%.01fK", val)
         case 1000000...999999999:
-            let val = Int(Double(self) / 1000000.0)
-            return "\(val) M"
+            let val = Double(self) / 1000000.0
+            return String(format: "%.01fM", val)
         default:
             return"\(self)"
         }

@@ -13,7 +13,7 @@ class ReplyViewController: UIViewController {
     @IBOutlet weak var charactersBarButtonItem: UIBarButtonItem!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var responseTextView: UITextView!
-    weak var delegate: TweetsViewController?
+    var delegate: TweetsViewController?
     
     internal var respondingToTweet: Tweet? {
         didSet {

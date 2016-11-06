@@ -15,7 +15,9 @@ protocol TweetsViewControllerDelegate {
 
 class TweetsViewController: UIViewController {
 
+    @IBOutlet weak var menuButton: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
+    internal weak var delegate: MenuViewController!
     internal var hasMoreTweets = true
     internal var tweets = [Tweet]()
     internal var isLoading = false
@@ -32,6 +34,8 @@ class TweetsViewController: UIViewController {
         
         tableView.insertSubview(refreshControl, at: 0)
         refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
+        menuButton.target = self
+        menuButton.action = #selector(onToggleMenu)
         loadTimeLine()
     }
     
@@ -69,10 +73,6 @@ class TweetsViewController: UIViewController {
 
     }
     
-    @IBAction func onLogoutButton(_ sender: AnyObject) {
-        TwitterClient.sharedInstance?.logout()
-    }
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let tweetDetailVC = segue.destination as? TweetDetailViewController
         let navigationController = segue.destination as? UINavigationController
@@ -95,15 +95,25 @@ class TweetsViewController: UIViewController {
         tableView.reloadData()
     }
     
-    @IBAction func onProfileImageTapGesture(_ sender: UITapGestureRecognizer) {
-        let tweetCell = sender.view?.superview?.superview as! TweetCell
-        let user = tweetCell.tweet?.user!
-        
+}
+
+extension TweetsViewController: MenuViewControllerDelegate {
+    
+    internal func onToggleMenu() {
+        delegate?.onToggleMenu()
     }
     
 }
 
 extension TweetsViewController: TweetCellDelegate {
+    
+    func onProfileImageTap(tweetCell: TweetCell) {
+        let user = tweetCell.tweet!.user!
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
+        vc.user = user
+        navigationController?.pushViewController(vc, animated: true)
+    }
     
     func onReply(tweetCell: TweetCell) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -144,7 +154,7 @@ extension TweetsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
-        cell.delegate = self
+        cell.delegate = self as? TweetCellDelegate
         cell.tweet = tweets[indexPath.row]
         
         if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && tableView.isDragging {

@@ -9,7 +9,7 @@
 import UIKit
 
 enum Page:Int {
-    case profile, timeline, mentions
+    case profile, timeline, mentions, logout
     
     func simpleDescription() -> String {
         switch self {
@@ -19,12 +19,14 @@ enum Page:Int {
             return "Timeline"
         case .mentions:
             return "Mentions"
+        case .logout:
+            return "Logout"
         }
     }
 }
 
-protocol NavigationDelegate {
-    func navigateTo(viewController: UIViewController, with: AnyObject?)
+protocol MenuViewControllerDelegate {
+    func onToggleMenu()
 }
 
 class MenuViewController: UIViewController {
@@ -46,16 +48,26 @@ class MenuViewController: UIViewController {
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         profileNavigationController = storyboard.instantiateViewController(withIdentifier: "ProfileNavigationController") as! UINavigationController
+        (profileNavigationController.topViewController as! ProfileViewController).delegate = self
         viewControllers.append(profileNavigationController)
         
         timelineNavigationController = storyboard.instantiateViewController(withIdentifier: "TimelineNavigationController") as! UINavigationController
+        (timelineNavigationController.topViewController as! TweetsViewController).delegate = self
         viewControllers.append(timelineNavigationController)
+        
+        mentionsNavigationController = storyboard.instantiateViewController(withIdentifier: "MentionsNavigationController") as! UINavigationController
+        (mentionsNavigationController.topViewController as! MentionsViewController).delegate = self
+        viewControllers.append(mentionsNavigationController)
         
         hamburgerViewController.contentViewController = timelineNavigationController
     }
     
-    func navigateTo() {
-        
+    func onToggleMenu() {
+        if hamburgerViewController.hasMenuOpen {
+            hamburgerViewController.closeMenu()
+        } else {
+            hamburgerViewController.openMenu()
+        }
     }
 
 }
@@ -71,7 +83,7 @@ extension MenuViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return 4
     }
     
 }
@@ -79,9 +91,14 @@ extension MenuViewController: UITableViewDataSource {
 extension MenuViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let index = indexPath.row
         tableView.deselectRow(at: indexPath, animated: true)
         
-        hamburgerViewController.contentViewController = viewControllers[indexPath.row]
+        if index == 3 {
+            TwitterClient.sharedInstance?.logout()
+        } else {
+            hamburgerViewController.contentViewController = viewControllers[indexPath.row]
+        }
     }
     
 }

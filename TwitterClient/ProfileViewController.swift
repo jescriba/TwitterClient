@@ -51,7 +51,7 @@ class ProfileViewController: UIViewController {
         headerScrollView.delegate = self
         panGestureRecognizer.delegate = self
 
-        if user == nil {
+        if user == nil || user == User.currentUser {
             let menuImage = UIImage(named: "menu")
             let menuButton = UIBarButtonItem(image: menuImage, style: .plain, target: self, action: #selector(onToggleMenu))
             navigationItem.leftBarButtonItem = menuButton
@@ -175,6 +175,13 @@ extension ProfileViewController: UIGestureRecognizerDelegate {
 }
 
 extension ProfileViewController: TweetsTableViewDelegate {
+    func didSelect(tweet: Tweet) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
+        vc.tweet = tweet
+        vc.delegate = self
+        navigationController?.pushViewController(vc, animated: true)
+    }
     
     func onProfileImageTap(user: User) {
         // Do nothing

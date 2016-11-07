@@ -60,7 +60,13 @@ extension MentionsViewController: NewTweetDelegate {
 }
 
 extension MentionsViewController: TweetsTableViewDelegate {
-    
+    func didSelect(tweet: Tweet) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
+        vc.tweet = tweet
+        vc.delegate = self
+        navigationController?.pushViewController(vc, animated: true)
+    }
     func onProfileImageTap(user: User) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController

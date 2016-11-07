@@ -54,6 +54,9 @@ extension TweetsViewController: NewTweetDelegate {
 }
 
 extension TweetsViewController: TweetsTableViewDelegate {
+    func didSelect(tweet: Tweet) {
+        //
+    }
     
     func onProfileImageTap(user: User) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)

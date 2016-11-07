@@ -14,6 +14,7 @@ enum Timeline:Int {
 }
 
 protocol TweetsTableViewDelegate {
+    func didSelect(tweet: Tweet)
     func onReply(tweet: Tweet)
     func onProfileImageTap(user: User)
     func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?)
@@ -163,6 +164,9 @@ extension TweetsTableView: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let cell = tableView.cellForRow(at: indexPath) as! TweetCell
+        tweetDelegate?.didSelect(tweet: cell.tweet!)
     }
 }
 

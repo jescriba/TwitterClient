@@ -9,10 +9,6 @@
 import UIKit
 import CircularSpinner
 
-protocol TweetsViewControllerDelegate {
-    func newTweet(_ tweet: Tweet)
-}
-
 class TweetsViewController: UIViewController {
 
     @IBOutlet weak var menuButton: UIBarButtonItem!
@@ -28,43 +24,9 @@ class TweetsViewController: UIViewController {
         
         tableView.tweetDelegate = self
         tableView.reload()
-//        refreshControl.addTarget(self, action: #selector(loadTimeLine(maxId:)), for: .valueChanged)
+
         menuButton.target = self
         menuButton.action = #selector(onToggleMenu)
-    }
-    
-    @objc internal func loadTimeLine(maxId offsetId: Int = -1) {
-        // For Obj C
-        var maxId: Int?
-        if offsetId != -1 {
-            maxId = offsetId
-        }
-        
-        isLoading = true
-        refreshControl.beginRefreshing()
-        CircularSpinner.show("Loading tweets...", animated: true, type: .indeterminate)
-        TwitterClient.sharedInstance?.homeTimeline(maxId: maxId, success: {
-            (tweets: [Tweet]) -> () in
-            if tweets.count == 0 {
-                self.hasMoreTweets = false
-            }
-            if maxId == nil {
-                self.tweets = tweets
-            } else {
-                self.tweets += tweets
-            }
-            self.tableView.reloadData()
-            CircularSpinner.hide()
-            self.refreshControl.endRefreshing()
-            self.isLoading = false
-            }, failure: {
-                (error: Error) -> () in
-                CircularSpinner.hide()
-                self.refreshControl.endRefreshing()
-                self.isLoading = false
-                self.present(Alert.controller(error: error), animated: true, completion: nil)
-        })
-
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -72,8 +34,7 @@ class TweetsViewController: UIViewController {
         let navigationController = segue.destination as? UINavigationController
         
         if let vc = tweetDetailVC {
-            //tweetDetailVC?.delegate = self
-            
+            tweetDetailVC?.delegate = self
             let cell = sender as! TweetCell
             vc.tweet = cell.tweet
         } else if let navVC = navigationController {
@@ -83,13 +44,34 @@ class TweetsViewController: UIViewController {
             }
         }
     }
-    
+}
+
+extension TweetsViewController: NewTweetDelegate {
+    func newTweet(_ tweet: Tweet) {
+        tweets.append(tweet)
+        tableView.reloadData()
+    }
 }
 
 extension TweetsViewController: TweetsTableViewDelegate {
     
     func onProfileImageTap(user: User) {
-        //
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
+        vc.user = user
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+    func onReply(tweet: Tweet) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
+        vc.respondingToTweet = tweet
+        //vc.delegate = self
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        present(viewControllerToPresent, animated: animated, completion: completion)
     }
     
 }
@@ -98,46 +80,5 @@ extension TweetsViewController: MenuViewControllerDelegate {
     
     func onToggleMenu() {
         delegate?.onToggleMenu()
-    }
-}
-
-extension TweetsViewController: TweetCellDelegate {
-    
-    func onProfileImageTap(tweetCell: TweetCell) {
-        let user = tweetCell.tweet!.user!
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "ProfileViewController") as! ProfileViewController
-        vc.user = user
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    func onReply(tweetCell: TweetCell) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
-        vc.respondingToTweet = tweetCell.tweet
-        //vc.delegate = self
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    func onRetweet(tweetCell: TweetCell) {
-        let tweet = tweetCell.tweet
-        TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
-                (tweet: Tweet) -> () in
-                tweetCell.tweet = tweet
-            }, failure: {
-                (error: Error) -> () in
-                self.present(Alert.controller(error: error), animated: true, completion: nil)
-        })
-    }
-    
-    func onFavorite(tweetCell: TweetCell) {
-        let tweet = tweetCell.tweet
-        TwitterClient.sharedInstance?.toggleFavorite(tweet: tweet!, success: {
-                (tweet: Tweet) -> () in
-                tweetCell.tweet = tweet
-            }, failure: {
-                (error: Error) -> () in
-                self.present(Alert.controller(error: error), animated: true, completion: nil)
-        })
     }
 }

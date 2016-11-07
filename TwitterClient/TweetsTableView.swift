@@ -14,7 +14,9 @@ enum Timeline:Int {
 }
 
 protocol TweetsTableViewDelegate {
+    func onReply(tweet: Tweet)
     func onProfileImageTap(user: User)
+    func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?)
 }
 
 class TweetsTableView: UITableView {
@@ -23,11 +25,37 @@ class TweetsTableView: UITableView {
             reload()
         }
     }
+    internal var user: User? = nil {
+        didSet {
+            reload(userId: user!.id!)
+        }
+    }
     internal var tweetDelegate: TweetsTableViewDelegate?
     internal var isLoading = false
     internal var hasMoreTweets = true
     internal var tweets = [Tweet]()
     internal let tweetsRefreshControl = UIRefreshControl()
+    internal var maxId: Int?
+    func timelineSuccess(tweets: [Tweet]) {
+        if tweets.count == 0 {
+            hasMoreTweets = false
+        }
+        if maxId == nil {
+            self.tweets = tweets
+        } else {
+            self.tweets += tweets
+        }
+        reloadData()
+        CircularSpinner.hide()
+        tweetsRefreshControl.endRefreshing()
+        isLoading = false
+    }
+    func timelineFailure(error: Error) {
+        CircularSpinner.hide()
+        tweetsRefreshControl.endRefreshing()
+        isLoading = false
+        present(viewControllerToPresent: Alert.controller(error: error), animated: true, completion: nil)
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -44,52 +72,62 @@ class TweetsTableView: UITableView {
         tweetsRefreshControl.addTarget(self, action: #selector(reload), for: .valueChanged)
     }
     
-    @objc internal func reload(maxId: Int = -1) {
-        loadTimeline(timeline!)
+    @objc internal func reload(maxId: Int = -1, userId: Int = -1) {
+        loadTimeline(timeline!, maxId: maxId, userId: userId)
     }
     
-    private func loadTimeline(_ timeline: Timeline) {
-        // TODO
+    internal func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        tweetDelegate?.present(viewControllerToPresent: viewControllerToPresent, animated: animated, completion: completion)
+    }
+    
+    private func loadTimeline(_ timeline: Timeline, maxId offsetId: Int = -1, userId: Int = -1) {
         var maxId: Int?
+        if offsetId != -1 {
+            maxId = offsetId
+        }
         isLoading = true
         tweetsRefreshControl.beginRefreshing()
         CircularSpinner.show("Loading tweets...", animated: true, type: .indeterminate)
-        TwitterClient.sharedInstance?.homeTimeline(maxId: maxId, success: {
-            (tweets: [Tweet]) -> () in
-            if tweets.count == 0 {
-                self.hasMoreTweets = false
-            }
-            if maxId == nil {
-                self.tweets = tweets
-            } else {
-                self.tweets += tweets
-            }
-            self.reloadData()
-            CircularSpinner.hide()
-            self.tweetsRefreshControl.endRefreshing()
-            self.isLoading = false
-        }, failure: {
-            (error: Error) -> () in
-            CircularSpinner.hide()
-            self.tweetsRefreshControl.endRefreshing()
-            self.isLoading = false
-            //self.present(Alert.controller(error: error), animated: true, completion: nil)
-        })
+        self.maxId = maxId
+        switch timeline {
+        case .home:
+            TwitterClient.sharedInstance?.homeTimeline(maxId: maxId, success: timelineSuccess, failure: timelineFailure)
+        case .mentions:
+            TwitterClient.sharedInstance?.mentionsTimeline(maxId: maxId, success: timelineSuccess, failure: timelineFailure)
+        case .user:
+            TwitterClient.sharedInstance?.userTimeline(userId: userId, success: timelineSuccess, failure: timelineFailure)
+        }
+
     }
     
 }
 
 extension TweetsTableView: TweetCellDelegate {
-    func onReply(tweetCell: TweetCell) {
-        //
-    }
     
-    func onFavorite(tweetCell: TweetCell) {
-        //
+    func onReply(tweetCell: TweetCell) {
+        tweetDelegate?.onReply(tweet: tweetCell.tweet!)
     }
     
     func onRetweet(tweetCell: TweetCell) {
-        //
+        let tweet = tweetCell.tweet
+        TwitterClient.sharedInstance?.toggleRetweet(tweet: tweet!, success: {
+            (tweet: Tweet) -> () in
+            tweetCell.tweet = tweet
+        }, failure: {
+            (error: Error) -> () in
+            self.present(viewControllerToPresent: Alert.controller(error: error), animated: true, completion: nil)
+        })
+    }
+    
+    func onFavorite(tweetCell: TweetCell) {
+        let tweet = tweetCell.tweet
+        TwitterClient.sharedInstance?.toggleFavorite(tweet: tweet!, success: {
+            (tweet: Tweet) -> () in
+            tweetCell.tweet = tweet
+        }, failure: {
+            (error: Error) -> () in
+            self.present(viewControllerToPresent: Alert.controller(error: error), animated: true, completion: nil)
+        })
     }
     
     func onProfileImageTap(tweetCell: TweetCell) {
@@ -106,10 +144,10 @@ extension TweetsTableView: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
-        cell.delegate = self as? TweetCellDelegate
+        cell.delegate = self
         cell.tweet = tweets[indexPath.row]
         
-        if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && tableView.isDragging {
+        if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && isDragging {
             let lastTweet = tweets.last!
             let maxId = lastTweet.id!
             

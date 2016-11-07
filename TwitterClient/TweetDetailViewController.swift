@@ -19,7 +19,7 @@ class TweetDetailViewController: UIViewController {
     @IBOutlet weak var favoritesLabel: UILabel!
     @IBOutlet weak var favoriteButton: UIButton!
     @IBOutlet weak var retweetButton: UIButton!
-    var delegate: TweetsViewControllerDelegate?
+    internal var delegate: NewTweetDelegate?
     
     internal var tweet: Tweet? {
         didSet {
@@ -84,14 +84,6 @@ class TweetDetailViewController: UIViewController {
         if let vc = replyVC {
             vc.respondingToTweet = tweet
         }
-    }
-    
-}
-
-extension TweetDetailViewController: TweetsViewControllerDelegate {
-    
-    func newTweet(_ tweet: Tweet) {
-        delegate?.newTweet(tweet)
     }
     
 }

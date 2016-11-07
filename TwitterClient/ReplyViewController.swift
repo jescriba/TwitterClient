@@ -13,6 +13,7 @@ class ReplyViewController: UIViewController {
     @IBOutlet weak var charactersBarButtonItem: UIBarButtonItem!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var responseTextView: UITextView!
+    internal var delegate: NewTweetDelegate?
     
     internal var respondingToTweet: Tweet? {
         didSet {
@@ -42,7 +43,7 @@ class ReplyViewController: UIViewController {
         TwitterClient.sharedInstance?.reply(message, respondingToTweet: respondingToTweet!, success: {
             (tweet: Tweet?) -> () in
                 let params = ["text": message]
-//                self.newTweet(tweet ?? Tweet(dictionary: params as NSDictionary))
+                self.delegate?.newTweet(tweet ?? Tweet(dictionary: params as NSDictionary))
                 self.navigationController?.popToRootViewController(animated: true)
             }, failure: {
                 (error: Error) in

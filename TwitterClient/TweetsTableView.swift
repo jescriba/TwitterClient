@@ -67,29 +67,22 @@ class TweetsTableView: UITableView {
         estimatedRowHeight = 100
         rowHeight = UITableViewAutomaticDimension
         
-        timeline = .home
         insertSubview(tweetsRefreshControl, at: 0)
-        
         tweetsRefreshControl.addTarget(self, action: #selector(reload), for: .valueChanged)
     }
     
-    @objc internal func reload(maxId: Int = -1) {
-        loadTimeline(timeline!, maxId: maxId)
+    @objc internal func reload() {
+        loadTimeline(timeline!)
     }
     
     internal func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
         tweetDelegate?.present(viewControllerToPresent: viewControllerToPresent, animated: animated, completion: completion)
     }
     
-    private func loadTimeline(_ timeline: Timeline, maxId offsetId: Int = -1) {
-        var maxId: Int?
-        if offsetId != -1 {
-            maxId = offsetId
-        }
+    private func loadTimeline(_ timeline: Timeline) {
         isLoading = true
         tweetsRefreshControl.beginRefreshing()
         CircularSpinner.show("Loading tweets...", animated: true, type: .indeterminate)
-        self.maxId = maxId
         switch timeline {
         case .home:
             TwitterClient.sharedInstance?.homeTimeline(maxId: maxId, success: timelineSuccess, failure: timelineFailure)
@@ -99,9 +92,7 @@ class TweetsTableView: UITableView {
             let userId = (user ?? User.currentUser!).id!
             TwitterClient.sharedInstance?.userTimeline(userId: userId, success: timelineSuccess, failure: timelineFailure)
         }
-
     }
-    
 }
 
 extension TweetsTableView: TweetCellDelegate {
@@ -151,9 +142,9 @@ extension TweetsTableView: UITableViewDataSource {
         
         if indexPath.row == tweets.count - 1 && !isLoading && hasMoreTweets && isDragging {
             let lastTweet = tweets.last!
-            let maxId = lastTweet.id!
+            maxId = lastTweet.id!
             
-            reload(maxId: maxId)
+            reload()
         }
         
         return cell

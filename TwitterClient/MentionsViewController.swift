@@ -14,9 +14,6 @@ class MentionsViewController: UIViewController {
     @IBOutlet weak var menuButton: UIBarButtonItem!
     @IBOutlet weak var tableView: TweetsTableView!
     internal weak var delegate: MenuViewController!
-    internal var tweets = [Tweet]()
-    internal var hasMoreTweets = true
-    internal var isLoading = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,21 +28,6 @@ class MentionsViewController: UIViewController {
     
 }
 
-extension MentionsViewController: UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let tweetDetailVC = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
-        tweetDetailVC.delegate = self
-        let cell = tableView.cellForRow(at: indexPath) as! TweetCell
-        tweetDetailVC.tweet = cell.tweet
-        
-        navigationController?.pushViewController(tweetDetailVC, animated: true)
-    }
-    
-}
 extension MentionsViewController:MenuViewControllerDelegate {
     internal func onToggleMenu() {
         delegate?.onToggleMenu()
@@ -54,8 +36,10 @@ extension MentionsViewController:MenuViewControllerDelegate {
 
 extension MentionsViewController: NewTweetDelegate {
     func newTweet(_ tweet: Tweet) {
-        tweets.append(tweet)
+        tableView.tweets.insert(tweet, at: 0)
         tableView.reloadData()
+        let topIndexPath = IndexPath(row: 0, section: 0)
+        tableView.scrollToRow(at: topIndexPath, at: .top, animated: true)
     }
 }
 

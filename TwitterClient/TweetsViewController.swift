@@ -14,16 +14,12 @@ class TweetsViewController: UIViewController {
     @IBOutlet weak var menuButton: UIBarButtonItem!
     @IBOutlet weak var tableView: TweetsTableView!
     internal weak var delegate: MenuViewController!
-    internal var hasMoreTweets = true
-    internal var tweets = [Tweet]()
-    internal var isLoading = false
-    private let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.tweetDelegate = self
-        tableView.reload()
+        tableView.timeline = .home
 
         menuButton.target = self
         menuButton.action = #selector(onToggleMenu)
@@ -48,8 +44,10 @@ class TweetsViewController: UIViewController {
 
 extension TweetsViewController: NewTweetDelegate {
     func newTweet(_ tweet: Tweet) {
-        tweets.append(tweet)
+        tableView.tweets.insert(tweet, at: 0)
         tableView.reloadData()
+        let topIndexPath = IndexPath(row: 0, section: 0)
+        tableView.scrollToRow(at: topIndexPath, at: .top, animated: true)
     }
 }
 

@@ -40,9 +40,6 @@ class ProfileViewController: UIViewController {
         }
     }
     internal weak var delegate: MenuViewController!
-    internal var tweets = [Tweet]()
-    private var isLoading = false
-    private var hasMoreTweets = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,15 +48,13 @@ class ProfileViewController: UIViewController {
         headerScrollView.delegate = self
         panGestureRecognizer.delegate = self
 
+        tableView.timeline = .user
         if user == nil || user == User.currentUser {
             let menuImage = UIImage(named: "menu")
             let menuButton = UIBarButtonItem(image: menuImage, style: .plain, target: self, action: #selector(onToggleMenu))
             navigationItem.leftBarButtonItem = menuButton
             user = User.currentUser!
         }
-        
-        tableView.timeline = .user
-        tableView.user = user
     }
     
     @IBAction func onPanGesture(_ sender: UIPanGestureRecognizer) {
@@ -99,25 +94,11 @@ extension ProfileViewController: MenuViewControllerDelegate {
 
 extension ProfileViewController: NewTweetDelegate {
     func newTweet(_ tweet: Tweet) {
-        tweets.append(tweet)
+        tableView.tweets.insert(tweet, at: 0)
         tableView.reloadData()
+        let topIndexPath = IndexPath(row: 0, section: 0)
+        tableView.scrollToRow(at: topIndexPath, at: .top, animated: true)
     }
-}
-
-extension ProfileViewController: UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let tweetDetailVC = storyboard.instantiateViewController(withIdentifier: "TweetDetailViewController") as! TweetDetailViewController
-        tweetDetailVC.delegate = self
-        let cell = tableView.cellForRow(at: indexPath) as! TweetCell
-        tweetDetailVC.tweet = cell.tweet
-        
-        navigationController?.pushViewController(tweetDetailVC, animated: true)
-    }
-    
 }
 
 extension ProfileViewController: UIScrollViewDelegate {

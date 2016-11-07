@@ -211,7 +211,7 @@
 				TargetAttributes = {
 					42549C7A1DC1B42800659819 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = GFSP92A3FB;
+						DevelopmentTeam = FYD86LA7RE;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -439,7 +439,7 @@
 			baseConfigurationReference = D197D8E91B6D6A63ADADEBA1 /* Pods-TwitterClient.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = GFSP92A3FB;
+				DEVELOPMENT_TEAM = FYD86LA7RE;
 				INFOPLIST_FILE = TwitterClient/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = joshuae.TwitterClient;
@@ -453,7 +453,7 @@
 			baseConfigurationReference = E39AD729DD7EF6D3E3E31E5D /* Pods-TwitterClient.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = GFSP92A3FB;
+				DEVELOPMENT_TEAM = FYD86LA7RE;
 				INFOPLIST_FILE = TwitterClient/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = joshuae.TwitterClient;

@@ -27,7 +27,7 @@ class TweetsTableView: UITableView {
     }
     internal var user: User? = nil {
         didSet {
-            reload(userId: user!.id!)
+            reload()
         }
     }
     internal var tweetDelegate: TweetsTableViewDelegate?
@@ -72,15 +72,15 @@ class TweetsTableView: UITableView {
         tweetsRefreshControl.addTarget(self, action: #selector(reload), for: .valueChanged)
     }
     
-    @objc internal func reload(maxId: Int = -1, userId: Int = -1) {
-        loadTimeline(timeline!, maxId: maxId, userId: userId)
+    @objc internal func reload(maxId: Int = -1) {
+        loadTimeline(timeline!, maxId: maxId)
     }
     
     internal func present(viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
         tweetDelegate?.present(viewControllerToPresent: viewControllerToPresent, animated: animated, completion: completion)
     }
     
-    private func loadTimeline(_ timeline: Timeline, maxId offsetId: Int = -1, userId: Int = -1) {
+    private func loadTimeline(_ timeline: Timeline, maxId offsetId: Int = -1) {
         var maxId: Int?
         if offsetId != -1 {
             maxId = offsetId
@@ -95,6 +95,7 @@ class TweetsTableView: UITableView {
         case .mentions:
             TwitterClient.sharedInstance?.mentionsTimeline(maxId: maxId, success: timelineSuccess, failure: timelineFailure)
         case .user:
+            let userId = (user ?? User.currentUser!).id!
             TwitterClient.sharedInstance?.userTimeline(userId: userId, success: timelineSuccess, failure: timelineFailure)
         }
 

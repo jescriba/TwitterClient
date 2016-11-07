@@ -36,6 +36,7 @@ class ProfileViewController: UIViewController {
             }
             
             tableView.tweetDelegate = self
+            tableView.user = user
         }
     }
     internal weak var delegate: MenuViewController!
@@ -159,6 +160,15 @@ extension ProfileViewController: UIScrollViewDelegate {
 }
 
 extension ProfileViewController: UIGestureRecognizerDelegate {
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        let location = touch.location(in: tableView)
+        if location.y > 0 {
+            return false
+        }
+        return true
+    }
+    
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
@@ -174,7 +184,7 @@ extension ProfileViewController: TweetsTableViewDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
         vc.respondingToTweet = tweet
-        //vc.delegate = self
+        vc.delegate = self
         navigationController?.pushViewController(vc, animated: true)
     }
     

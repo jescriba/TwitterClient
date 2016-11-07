@@ -25,6 +25,7 @@ class MentionsViewController: UIViewController {
         menuButton.action = #selector(onToggleMenu)
 
         tableView.timeline = .mentions
+        tableView.user = User.currentUser
         tableView.tweetDelegate = self
     }
     
@@ -71,7 +72,7 @@ extension MentionsViewController: TweetsTableViewDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
         vc.respondingToTweet = tweet
-        //vc.delegate = self
+        vc.delegate = self
         navigationController?.pushViewController(vc, animated: true)
     }
     

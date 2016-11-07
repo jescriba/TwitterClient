@@ -66,7 +66,7 @@ extension TweetsViewController: TweetsTableViewDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "ReplyViewController") as! ReplyViewController
         vc.respondingToTweet = tweet
-        //vc.delegate = self
+        vc.delegate = self
         navigationController?.pushViewController(vc, animated: true)
     }
     

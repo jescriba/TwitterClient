@@ -17,6 +17,15 @@ class Tweet: NSObject {
     var timeStamp: Date?
     var retweetCount: Int = 0
     var favoritesCount: Int = 0
+    var entities: Entity?
+    var media: Media? {
+        get {
+            if entities != nil && !entities!.media.isEmpty {
+                return entities!.media.first!
+            }
+            return nil
+        }
+    }
     
     init(dictionary: NSDictionary) {
         id = dictionary["id"] as? Int
@@ -38,6 +47,11 @@ class Tweet: NSObject {
             user = User(dictionary: userDictionary)
         } else {
             user = User.currentUser
+        }
+        
+        let entitiesDictionary = dictionary["entities"] as? NSDictionary
+        if let entitiesDictionary = entitiesDictionary {
+            entities = Entity(dictionary: entitiesDictionary)
         }
     }
     

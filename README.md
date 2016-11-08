@@ -1,4 +1,4 @@
-# Project 4 - *Name of App Here*
+# Project 4 - *TwitterClient*
 
 Time spent: **10** hours spent in total
 

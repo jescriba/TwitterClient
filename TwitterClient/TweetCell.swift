@@ -12,6 +12,7 @@ protocol TweetCellDelegate {
     func onReply(tweetCell: TweetCell)
     func onRetweet(tweetCell: TweetCell)
     func onFavorite(tweetCell: TweetCell)
+    func onProfileImageTap(tweetCell: TweetCell)
 }
 
 class TweetCell: UITableViewCell {
@@ -26,7 +27,7 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var favoritesCountLabel: UILabel!
     @IBOutlet weak var timeSincePostLabel: UILabel!
     
-    weak var delegate: TweetsViewController?
+    var delegate: TweetCellDelegate?
     
     internal var tweet: Tweet? {
         didSet {
@@ -38,6 +39,10 @@ class TweetCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        let profileTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onProfileImageTap))
+        profileImageView.isUserInteractionEnabled = true
+        profileImageView.addGestureRecognizer(profileTapRecognizer)
     }
     
     private func setupTweetUI() {
@@ -71,6 +76,10 @@ class TweetCell: UITableViewCell {
         selectedBackgroundView = bgView
     }
     
+    func onProfileImageTap() {
+        delegate?.onProfileImageTap(tweetCell: self)
+    }
+    
     @IBAction func onReplyButton(_ sender: AnyObject) {
         delegate?.onReply(tweetCell: self)
     }
@@ -82,46 +91,4 @@ class TweetCell: UITableViewCell {
     @IBAction func onFavoriteButton(_ sender: AnyObject) {
         delegate?.onFavorite(tweetCell: self)
     }
-}
-
-
-extension Int {
-    
-    // In pratice most users don't have billions of likes/retweets...yet
-    func simpleDescription() -> String {
-        switch self {
-        case 1000...999999:
-            let val = Int(Double(self) / 1000.0)
-            return "\(val) K"
-        case 1000000...999999999:
-            let val = Int(Double(self) / 1000000.0)
-            return "\(val) M"
-        default:
-            return"\(self)"
-        }
-    }
-    
-}
-
-extension Date {
-    
-    func timeSinceDescription() -> String {
-        let interval = -1 * self.timeIntervalSinceNow
-        let mins = interval / 60
-        let hours = interval / 3600
-        let days = interval / (3600 * 24)
-        
-        if interval < 60 {
-            return "\(Int(interval)) s"
-        } else if mins < 60 {
-            return "\(Int(mins)) m"
-        } else if hours < 24 {
-            return "\(Int(hours)) hr"
-        } else if days < 7 {
-            return "\(Int(days)) d"
-        } else {
-            return "wk+"
-        }
-    }
-    
 }

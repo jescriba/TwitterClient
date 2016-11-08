@@ -10,6 +10,8 @@ import UIKit
 
 class TweetDetailViewController: UIViewController {
 
+    @IBOutlet weak var mediaImageHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var mediaImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var screenNameLabel: UILabel!
     @IBOutlet weak var profileImageView: UIImageView!
@@ -19,8 +21,8 @@ class TweetDetailViewController: UIViewController {
     @IBOutlet weak var favoritesLabel: UILabel!
     @IBOutlet weak var favoriteButton: UIButton!
     @IBOutlet weak var retweetButton: UIButton!
-    weak var delegate: TweetsViewController?
-    
+    internal var delegate: NewTweetDelegate?
+    private let originalMediaImageHeightConstraint: CGFloat = 150
     internal var tweet: Tweet? {
         didSet {
             setupTweetUI()
@@ -48,6 +50,19 @@ class TweetDetailViewController: UIViewController {
                 retweetButton.setImage(#imageLiteral(resourceName: "retweet"), for: .normal)
             }
             dateLabel.text = tweet.timeStamp?.simpleDescription() ?? ""
+            if let media = tweet.media {
+                if let mediaUrl = media.mediaUrl {
+                    mediaImageHeightConstraint.constant = originalMediaImageHeightConstraint
+                    mediaImageView.setImageWith(mediaUrl)
+                    mediaImageView.isHidden = false
+                    if let mediaUrlString = media.urlString {
+                        tweetLabel.text = tweet.text?.replacingOccurrences(of: mediaUrlString, with: "")
+                    }
+                }
+            } else {
+                mediaImageView.isHidden = true
+                mediaImageHeightConstraint.constant = 0
+            }
         }
     }
     
@@ -86,21 +101,4 @@ class TweetDetailViewController: UIViewController {
         }
     }
     
-}
-
-extension TweetDetailViewController: TweetsViewControllerDelegate {
-    
-    func newTweet(_ tweet: Tweet) {
-        delegate?.newTweet(tweet)
-    }
-    
-}
-
-extension Date {
-    
-    func simpleDescription() -> String? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/d/yy, HH:mm"
-        return formatter.string(from: self)
-    }
 }

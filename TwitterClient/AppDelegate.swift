@@ -20,13 +20,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName : UIColor.white]
         UINavigationBar.appearance().tintColor = UIColor.white
-        UINavigationBar.appearance().barTintColor = UIColor(red:0.00, green:0.71, blue:0.80, alpha:1.0)
+        UINavigationBar.appearance().barTintColor = UIColor(red:0.00, green:0.52, blue:1.00, alpha:1.0)
         
+        window?.makeKeyAndVisible()
         if let user = User.currentUser {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "TweetsNavigationController")
             TwitterClient.sharedInstance?.login(user: user)
-            window?.rootViewController = vc
+            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let hamburgerViewController = storyboard.instantiateViewController(withIdentifier: "HamburgerViewController") as! HamburgerViewController
+            
+            window?.rootViewController = hamburgerViewController
         }
     
         NotificationCenter.default.addObserver(forName: User.userDidLogOutNotification, object: nil, queue: OperationQueue.main, using: {

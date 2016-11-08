@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol NewTweetDelegate {
+    func newTweet(_ tweet: Tweet)
+}
+
 class ComposeTweetViewController: UIViewController {
 
     @IBOutlet weak var nameLabel: UILabel!
@@ -15,7 +19,7 @@ class ComposeTweetViewController: UIViewController {
     @IBOutlet weak var tweetTextView: UITextView!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var charactersBarButtonItem: UIBarButtonItem!
-    weak var delegate: TweetsViewController?
+    internal var delegate: NewTweetDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,18 +46,12 @@ class ComposeTweetViewController: UIViewController {
         TwitterClient.sharedInstance?.tweet(message, success: {
             (tweet: Tweet?) -> () in
                 let params = ["text": message]
-                self.newTweet(tweet ?? Tweet(dictionary: params as NSDictionary))
+                self.delegate?.newTweet(tweet ?? Tweet(dictionary: params as NSDictionary))
                 self.dismiss(animated: true, completion: nil)
             }, failure: {
                 (error: Error) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)
         })
-    }
-}
-
-extension ComposeTweetViewController: TweetsViewControllerDelegate {
-    func newTweet(_ tweet: Tweet) {
-        delegate?.newTweet(tweet)
     }
 }
 

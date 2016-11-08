@@ -25,7 +25,7 @@ class LoginViewController: UIViewController {
     @IBAction func onLoginButton(_ sender: AnyObject) {
         TwitterClient.sharedInstance?.login(success: {
             () -> () in
-                self.performSegue(withIdentifier: "loginSegue", sender: self)
+                self.performSegue(withIdentifier: "HamburgerSegue", sender: self)
             }, failure: {
                 (error: Error?) -> () in
                 self.present(Alert.controller(error: error), animated: true, completion: nil)

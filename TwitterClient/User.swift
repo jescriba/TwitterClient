@@ -16,7 +16,11 @@ class User: NSObject {
     var name: String?
     var screenName: String?
     var tagLine: String?
+    var followersCount: Int = 0
+    var friendsCount: Int = 0
+    var statusesCount: Int = 0
     var profileUrl: URL?
+    var bannerUrl: URL?
     var dictionary: NSDictionary?
     var requestToken: BDBOAuth1Credential?
     
@@ -27,9 +31,16 @@ class User: NSObject {
         name = dictionary["name"] as? String
         screenName = dictionary["screen_name"] as? String
         tagLine = dictionary["description"] as? String
+        followersCount = dictionary["followers_count"] as? Int ?? 0
+        friendsCount = dictionary["friends_count"] as? Int ?? 0
+        statusesCount = dictionary["statuses_count"] as? Int ?? 0
         let profileUrlString = dictionary["profile_image_url_https"] as? String
         if let profileUrlString = profileUrlString {
             profileUrl = URL(string: profileUrlString)
+        }
+        let bannerUrlString = dictionary["profile_banner_url"] as? String
+        if let bannerUrlString = bannerUrlString {
+            bannerUrl = URL(string: bannerUrlString)
         }
     }
     

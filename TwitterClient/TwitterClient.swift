@@ -25,7 +25,7 @@ class TwitterClient: BDBOAuth1SessionManager {
         loginFailure = failure
      
         deauthorize()
-        fetchRequestToken(withPath: "oauth/request_token", method: "GET", callbackURL: URL(string: "twitter://"), scope: nil, success: {
+        fetchRequestToken(withPath: "oauth/request_token", method: "GET", callbackURL: URL(string: "twitterClient://"), scope: nil, success: {
                 (requestToken: BDBOAuth1Credential?) -> () in
                 let url = URL(string: "https://api.twitter.com/oauth/authorize?oauth_token=\(requestToken!.token!)")!
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -65,6 +65,42 @@ class TwitterClient: BDBOAuth1SessionManager {
         deauthorize()
         
         NotificationCenter.default.post(name: User.userDidLogOutNotification, object: nil)
+    }
+    
+    func mentionsTimeline(maxId: Int? = nil, success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
+        var endPoint = "1.1/statuses/mentions_timeline.json"
+        if let maxId = maxId {
+            endPoint += "?max_id=\(maxId)"
+        }
+        
+        get(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries: dictionaries)
+            
+            success(tweets)
+        }, failure: {
+            (task: URLSessionDataTask?, error: Error) -> () in
+            failure(error)
+        })
+    }
+    
+    func userTimeline(userId: Int, maxId: Int? = nil, success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
+        var endPoint = "1.1/statuses/user_timeline.json?user_id=\(userId)"
+        if let maxId = maxId {
+            endPoint += "?max_id=\(maxId)"
+        }
+        
+        get(endPoint, parameters: nil, progress: nil, success: {
+            (task: URLSessionDataTask, response: Any?) -> () in
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries: dictionaries)
+            
+            success(tweets)
+        }, failure: {
+            (task: URLSessionDataTask?, error: Error) -> () in
+            failure(error)
+        })
     }
     
     func homeTimeline(maxId: Int? = nil, success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
@@ -200,10 +236,4 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-}
-
-extension String {
-    func urlEncode() -> String {
-        return self.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-    }
 }
